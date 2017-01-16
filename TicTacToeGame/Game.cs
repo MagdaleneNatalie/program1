@@ -29,7 +29,6 @@ namespace TicTacToeGame
             this.Board.Grid[place] = (int)mark;
         }
 
-
         public Mark CheckWin()
         {
             var result = new List<Mark>();

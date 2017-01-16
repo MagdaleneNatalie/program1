@@ -212,6 +212,37 @@ namespace TicTacToeTests
             Assert.Equal(Mark.O, game1.CheckWin());
         }
 
+        [Fact]
+        public void Check_Win_Conditions_None()
+        {
+            var p1 = new Player
+            {
+                Name = "Przemek",
+                Mark = Mark.X
+            };
+
+            var p2 = new Player
+            {
+                Name = "Magda",
+                Mark = Mark.O
+            };
+
+            var game1 = new Game(p1, p2);
+
+            game1.MarkSpace(Mark.O, 1);
+            game1.MarkSpace(Mark.O, 3);
+            game1.MarkSpace(Mark.O, 4);
+            game1.MarkSpace(Mark.O, 6);
+            game1.MarkSpace(Mark.O, 8);
+
+            game1.MarkSpace(Mark.X, 0);
+            game1.MarkSpace(Mark.X, 2);
+            game1.MarkSpace(Mark.X, 5);
+            game1.MarkSpace(Mark.X, 7);
+            
+            Assert.Equal(Mark.None, game1.CheckWin());
+        }
+
 
     }
 }
