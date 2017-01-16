@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TicTacToeGame
 {
-    internal class Board
+    public class Board
     {
         public int[] Grid { get; private set; }
 
