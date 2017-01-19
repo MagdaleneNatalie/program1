@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace TicTacToeGame
 {
+    [Serializable]
     public class Player
     {
         public string Name { get; set; }

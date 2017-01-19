@@ -51,6 +51,8 @@ namespace TicTacToeServer
 
                         byte[] msg = System.Text.Encoding.ASCII.GetBytes(data);
 
+                        
+                        
                         // Send back a response.
                         stream.Write(msg, 0, msg.Length);
                         Console.WriteLine("Wysłanie {0}", data);
