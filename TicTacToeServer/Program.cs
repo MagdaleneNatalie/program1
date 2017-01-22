@@ -28,60 +28,52 @@ namespace TicTacToeServer
                 server = new TcpListener(localAddr, port);
                 server.Start();
 
+
+                Console.WriteLine("Czekanie na połączenie...");
+
                 TcpClient client = server.AcceptTcpClient();
 
-                while (client.Connected)
+                Console.WriteLine("Połączono!");
+
+                NetworkStream stream = client.GetStream();
+
+                var sendTask = new Task(() =>
                 {
-                    Console.Write("Czekanie na gracza... ");
+                    while (client.Connected)
+                    {
+                        Console.WriteLine("Wyśli wiadomosć: ");
+                        var s = Console.ReadLine();
+                        var msg = Encoding.ASCII.GetBytes(s);
+                        stream.Write(msg, 0, msg.Length);
+                    }
+                });
 
-                   
-                    
-                    Console.WriteLine("Połącznie");
+                var readTask = new Task(() =>
+                {
+                    while (client.Connected)
+                    {
+                        Console.WriteLine("Odebrano widomosć: ");
+                        var bufer = new byte[8];
+                        stream.Read(bufer, 0, 8);
+                        var s1 = Encoding.ASCII.GetString(bufer);
+                        Console.WriteLine(s1);
+                    }
+                });
 
-                    NetworkStream stream = client.GetStream();
-                                        
-                    BinaryFormatter b = new BinaryFormatter();
+                sendTask.Start();
+                readTask.Start();
 
-                    var player = (Player)b.Deserialize(stream);
+                while (true)
+                {
 
-                    players.Add(player);
-
-                    Console.WriteLine($"Dodanie gracza {player.Name}");
-
-                    var game = new Game(players[0], new Player { Name = "Magda" });
-
-                    game.MarkSpace(Mark.O, 2);
-                    Console.WriteLine("Gramy");
-
-                    var ms = new MemoryStream();
-
-                    Console.WriteLine("Wysyłanie planszy");
-
-                    b.Serialize(ms, game.Board.Grid);
-
-                    stream.Write(ms.GetBuffer(),0,(int)ms.Length);
-
-                    Console.WriteLine("Ruch");
-                    Console.ReadKey();
-
-
-                    game.MarkSpace(Mark.X, 1);
-                    Console.WriteLine("Wysyłanie ruchu");
-
-                    b.Serialize(ms, game.Board.Grid);
-
-                    stream.Write(ms.GetBuffer(), 0, (int)ms.Length);
-
-                    Console.ReadKey();
-
-                    client.Close();
                 }
 
+                client.Close();
 
-               
 
 
-               
+
+
             }
             catch (SocketException e)
             {

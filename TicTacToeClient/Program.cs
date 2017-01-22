@@ -30,30 +30,49 @@ namespace TicTacToeClient
                 Int32 port = 13000;
                 TcpClient client = new TcpClient("127.0.0.1", port);
 
+                
 
                 NetworkStream stream = client.GetStream();
 
-                stream.Write(ms.GetBuffer(), 0, (int)ms.Length);
+                var sendTask = new Task(() =>
+                {
+                    while (client.Connected)
+                    {
+                        Console.WriteLine("Wyśli wiadomosć: ");
+                        var s = Console.ReadLine();
+                        var msg = Encoding.ASCII.GetBytes(s);
+                        stream.Write(msg, 0, msg.Length);
+                    }
+                });
 
-                Console.WriteLine("Aktywacja użytkownika");
-                Console.ReadKey();
-                stream.Flush();
+                var readTask = new Task(() =>
+                {
+                    while (client.Connected)
+                    {
+                        Console.WriteLine("Odebrano widomosć: ");
+                        var bufer = new byte[8];
+                        stream.Read(bufer, 0, 8);
+                        var s1 = Encoding.ASCII.GetString(bufer);
+                        Console.WriteLine(s1);
+                    }
+                });
 
-                stream.Write(ms.GetBuffer(), 0, (int)ms.Length);
+                sendTask.Start();
+                readTask.Start();
 
-                var ms2 = new MemoryStream();
-                Byte[] bytes = new Byte[64];
+                while (true)
+                {
 
-                //var i = stream.Read(bytes, 0, bytes.Length);
+                }
 
-                BinaryFormatter bf = new BinaryFormatter();
 
-                //var ms1 = new MemoryStream();
 
-                //ms1.Write(bytes, 0, bytes.Length);
 
-              
-                Console.ReadKey();
+
+
+
+
+
 
 
 
