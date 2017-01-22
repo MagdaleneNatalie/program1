@@ -14,16 +14,9 @@ namespace TicTacToeClient
     {
         static void Main(string[] args)
         {
-            var player = new Player
-            {
-                Name = "Przemek"
-            };
 
-            BinaryFormatter formatter = new BinaryFormatter();
 
-            var ms = new MemoryStream();
 
-            formatter.Serialize(ms, player);
 
             try
             {
@@ -47,27 +40,40 @@ namespace TicTacToeClient
                 {
                     while (client.Connected)
                     {
-                        Console.WriteLine("Wyśli wiadomosć: ");
-                        var s = Console.ReadLine();
-                        var msg = Encoding.ASCII.GetBytes(s);
-                        stream.Write(msg, 0, msg.Length);
-                    }
-                });
+                        //var ms = new MemoryStream(64);
 
-                var readTask = new Task(() =>
-                {
-                    while (client.Connected)
-                    {
-                        Console.WriteLine("Odebrano widomosć: ");
-                        var bufer1 = new byte[8];
-                        stream.Read(bufer, 0, 8);
-                        var s11 = Encoding.ASCII.GetString(bufer1);
-                        Console.WriteLine(s11);
-                    }
-                });
+                        //stream.Read(ms.GetBuffer(), 0, 64);
+
+                        //var bf = new BinaryFormatter();
+
+                        //var board = (int[])bf.Deserialize(ms);
+
+                        //ShowBoard(board);
+
+                        var bytea = new byte[64];
+
+                        stream.Read(bytea, 0, 64);
+
+                        var ms = new MemoryStream(bytea);
+
+
+                        var bf = new BinaryFormatter();
+
+                        ShowBoard((int[])bf.Deserialize(ms));
+
+                        Console.WriteLine("Twój ruch...");
+
+                        var spaceByte = Encoding.ASCII.GetBytes(Console.ReadLine());
+
+                        stream.Write(spaceByte, 0, spaceByte.Length);
+
+                    } });
+
+
+               
 
                 sendTask.Start();
-                readTask.Start();
+               
 
                 while (true)
                 {
@@ -111,6 +117,15 @@ namespace TicTacToeClient
                 Console.WriteLine("SocketException: {0}", e);
             }
 
+        }
+        private static void ShowBoard(int[] grid)
+        {
+            Console.WriteLine("-------");
+            for (int i = 0; i < grid.Length; i += 3)
+            {
+                Console.WriteLine($"|{grid[i]}|{grid[i + 1]}|{grid[i + 2]}|");
+            }
+            Console.WriteLine("-------");
         }
     }
 }

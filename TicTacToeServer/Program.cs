@@ -17,7 +17,9 @@ namespace TicTacToeServer
         {
             TcpListener server = null;
 
-            var players = new List<Player>();
+            
+
+           
 
             try
             {
@@ -46,32 +48,45 @@ namespace TicTacToeServer
                
                 stream.Write(nickByte, 0, nickByte.Length);
 
+                var game = new Game(new Player { Name = opponentNick }, new Player { Name = nick });
+
+                Console.WriteLine($"Stworzenie gry {game.Id}");
+                Console.WriteLine("Rozpoczęcie gry...");
 
                 var sendTask = new Task(() =>
                 {
                     while (client.Connected)
                     {
-                        Console.WriteLine("Wyśli wiadomosć: ");
-                        var s = Console.ReadLine();
-                        var msg = Encoding.ASCII.GetBytes(s);
-                        stream.Write(msg, 0, msg.Length);
+                        ShowBoard(game.Board.Grid);
+                        Console.WriteLine("Twój ruch...");
+
+                        var space = int.Parse(Console.ReadLine());
+
+                        game.MarkSpace(Mark.X, space);
+
+                        var ms = new MemoryStream();
+                        var bf = new BinaryFormatter();
+
+                        bf.Serialize(ms, game.Board.Grid);
+
+                        stream.Write(ms.GetBuffer(), 0, (int)ms.Length);
+                     
+                        Console.WriteLine($"Czekam na ruch {opponentNick}");
+
+                        var bufer = new byte[1];
+                        stream.Read(bufer, 0, 1);
+
+                        var space1 = Encoding.ASCII.GetString(bufer);
+
+                        game.MarkSpace(Mark.X, int.Parse(space1));
+
                     }
                 });
 
-                var readTask = new Task(() =>
-                {
-                    while (client.Connected)
-                    {
-                        Console.WriteLine("Odebrano widomosć: ");
-                        var bufer = new byte[8];
-                        stream.Read(bufer, 0, 8);
-                        var s1 = Encoding.ASCII.GetString(bufer);
-                        Console.WriteLine(s1);
-                    }
-                });
+            
 
                 sendTask.Start();
-                readTask.Start();
+               
 
                 while (true)
                 {
@@ -98,6 +113,16 @@ namespace TicTacToeServer
 
             
             Console.Read();
+        }
+
+        private static void ShowBoard(int[] grid)
+        {
+            Console.WriteLine("-------");
+            for (int i = 0; i < grid.Length; i+=3)
+            {
+                Console.WriteLine($"|{grid[i]}|{grid[i+1]}|{grid[i+2]}|");
+            }
+            Console.WriteLine("-------");
         }
     }
 }
