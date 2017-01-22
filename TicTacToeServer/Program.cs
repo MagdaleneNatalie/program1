@@ -69,7 +69,7 @@ namespace TicTacToeServer
                         if (winSign != Mark.None)
                         {
                             Console.WriteLine($"Wygrał {winSign}");
-                            var ms1 = new MemoryStream();
+                            var ms1 = new MemoryStream(64);
                             var bf1 = new BinaryFormatter();
 
                             bf1.Serialize(ms1, winSign);
