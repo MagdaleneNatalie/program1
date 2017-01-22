@@ -18,6 +18,8 @@ namespace TicTacToeClient
 
         internal static NetworkStream stream = client.GetStream();
 
+        internal static string opponentName;
+
         static void Main(string[] args)
         {
             try
@@ -30,8 +32,8 @@ namespace TicTacToeClient
 
                 var bufer = new byte[20];
                 stream.Read(bufer, 0, 20);
-                var s1 = Encoding.ASCII.GetString(bufer);
-                Console.WriteLine($"Grasz z {s1}");
+                opponentName = Encoding.ASCII.GetString(bufer);
+                Console.WriteLine($"Grasz z {opponentName}");
 
                 var gameTask = new Task(GameTask);
 
@@ -52,6 +54,7 @@ namespace TicTacToeClient
         }
         private static void ShowBoard(int[] grid)
         {
+            Console.Clear();
             Console.WriteLine("-------");
             for (int i = 0; i < grid.Length; i += 3)
             {
@@ -86,7 +89,17 @@ namespace TicTacToeClient
 
                 Console.WriteLine("Twój ruch...");
 
-                var spaceByte = Encoding.ASCII.GetBytes(Console.ReadLine());
+                var space = Console.ReadLine();
+
+                var spaceByte = Encoding.ASCII.GetBytes(space);
+
+                var board = (int[])obj;
+
+                board[int.Parse(space)] = (int)Mark.X;
+
+                ShowBoard(board);
+
+                Console.WriteLine($"Czekam na ruch od: {opponentName}");
 
                 stream.Write(spaceByte, 0, spaceByte.Length);
 

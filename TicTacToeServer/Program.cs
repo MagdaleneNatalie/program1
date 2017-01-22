@@ -93,6 +93,7 @@ namespace TicTacToeServer
 
         private static void ShowBoard(int[] grid)
         {
+            Console.Clear();
             Console.WriteLine("-------");
             for (int i = 0; i < grid.Length; i+=3)
             {
@@ -112,6 +113,8 @@ namespace TicTacToeServer
                 var space = int.Parse(Console.ReadLine());
 
                 game.MarkSpace(Mark.O, space);
+
+                ShowBoard(game.Board.Grid);
 
                 var winSign = game.CheckWin();
 
@@ -133,7 +136,7 @@ namespace TicTacToeServer
 
                 stream.Write(ms.GetBuffer(), 0, (int)ms.Length);
 
-                Console.WriteLine($"Czekam na ruch {game.PlayerX.Name}");
+                Console.WriteLine($"Czekam na ruch od: {game.PlayerX.Name}");
 
                 var bufer = new byte[1];
                 stream.Read(bufer, 0, 1);
