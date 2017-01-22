@@ -37,6 +37,12 @@ namespace TicTacToeClient
                 var nickByte = Encoding.ASCII.GetBytes(nick);
                 stream.Write(nickByte, 0, nickByte.Length);
 
+                var bufer = new byte[20];
+                stream.Read(bufer, 0, 20);
+                var s1 = Encoding.ASCII.GetString(bufer);
+                Console.WriteLine($"Grasz z {s1}");
+
+
                 var sendTask = new Task(() =>
                 {
                     while (client.Connected)
@@ -53,10 +59,10 @@ namespace TicTacToeClient
                     while (client.Connected)
                     {
                         Console.WriteLine("Odebrano widomosć: ");
-                        var bufer = new byte[8];
+                        var bufer1 = new byte[8];
                         stream.Read(bufer, 0, 8);
-                        var s1 = Encoding.ASCII.GetString(bufer);
-                        Console.WriteLine(s1);
+                        var s11 = Encoding.ASCII.GetString(bufer1);
+                        Console.WriteLine(s11);
                     }
                 });
 

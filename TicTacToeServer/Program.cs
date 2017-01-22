@@ -29,15 +29,23 @@ namespace TicTacToeServer
                 server.Start();
 
 
-                Console.WriteLine("Czekanie na gracza...");
+
+                Console.WriteLine("Podaj swoje nick i naciśnij ENTER ");
+                var nick = Console.ReadLine();
+                var nickByte = Encoding.ASCII.GetBytes(nick);
 
                 TcpClient client = server.AcceptTcpClient();
                 NetworkStream stream = client.GetStream();
 
+
                 var bufferNick = new byte[20];
                 stream.Read(bufferNick, 0, 20);
-                var nick = Encoding.ASCII.GetString(bufferNick);
-                Console.WriteLine($"Podłączony gracz o nicku {nick}");
+                var opponentNick = Encoding.ASCII.GetString(bufferNick);
+                Console.WriteLine($"Podłączony gracz o nicku {opponentNick}");
+
+               
+                stream.Write(nickByte, 0, nickByte.Length);
+
 
                 var sendTask = new Task(() =>
                 {
