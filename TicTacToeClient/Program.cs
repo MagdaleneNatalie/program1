@@ -56,10 +56,22 @@ namespace TicTacToeClient
 
                         var ms = new MemoryStream(bytea);
 
-
                         var bf = new BinaryFormatter();
+                        
+                        var obj = bf.Deserialize(ms);
 
-                        ShowBoard((int[])bf.Deserialize(ms));
+                        if (obj is int[])
+                        {
+                            ShowBoard((int[])obj);
+                        }
+
+                        if (obj is Mark)
+                        {
+                            Console.WriteLine($"Wygrał {(Mark)obj}");
+                            Console.ReadKey();
+                            break;
+                        }
+
 
                         Console.WriteLine("Twój ruch...");
 

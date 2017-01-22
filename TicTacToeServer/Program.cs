@@ -62,7 +62,20 @@ namespace TicTacToeServer
 
                         var space = int.Parse(Console.ReadLine());
 
-                        game.MarkSpace(Mark.X, space);
+                        game.MarkSpace(Mark.O, space);
+
+                        var winSign = game.CheckWin();
+
+                        if (winSign != Mark.None)
+                        {
+                            Console.WriteLine($"Wygrał {winSign}");
+                            var ms1 = new MemoryStream();
+                            var bf1 = new BinaryFormatter();
+
+                            bf1.Serialize(ms1, winSign);
+
+                            stream.Write(ms1.GetBuffer(), 0, 64);
+                        }
 
                         var ms = new MemoryStream();
                         var bf = new BinaryFormatter();
