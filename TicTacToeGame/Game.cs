@@ -18,8 +18,25 @@ namespace TicTacToeGame
         public Guid Id { get; }
         public Board Board { get; set; }
 
+        public Player PlayerX { get; private set; }
+        public Player PlayerO { get; private set; }
+
         public Game(Player player1, Player player2)
         {
+            switch (player1.Mark)
+            {
+                case Mark.O:
+                  this.PlayerO = player1;
+                  this.PlayerX = player2;
+                    break;
+                case Mark.X:
+                    this.PlayerX = player1;
+                    this.PlayerO = player2;
+                    break;
+                default:
+                    throw new Exception("Gracz musi mieć wybraną stronę");
+            }
+
             this.Id = new Guid();
             this.Board = new Board();
         }

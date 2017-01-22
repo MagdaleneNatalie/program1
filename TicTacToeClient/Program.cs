@@ -60,7 +60,6 @@ namespace TicTacToeClient
             Console.WriteLine("-------");
         }
 
-
         private static void GameTask()
         {
             while (client.Connected)
