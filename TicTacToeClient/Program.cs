@@ -25,20 +25,42 @@ namespace TicTacToeClient
 
             formatter.Serialize(ms, player);
 
-            
-
-
             try
             {
                 Int32 port = 13000;
                 TcpClient client = new TcpClient("127.0.0.1", port);
 
-             
+
                 NetworkStream stream = client.GetStream();
 
                 stream.Write(ms.GetBuffer(), 0, (int)ms.Length);
 
-                Console.WriteLine("Sent:");
+                Console.WriteLine("Aktywacja użytkownika");
+                Console.ReadKey();
+                stream.Flush();
+
+                stream.Write(ms.GetBuffer(), 0, (int)ms.Length);
+
+                var ms2 = new MemoryStream();
+                Byte[] bytes = new Byte[64];
+
+                //var i = stream.Read(bytes, 0, bytes.Length);
+
+                BinaryFormatter bf = new BinaryFormatter();
+
+                //var ms1 = new MemoryStream();
+
+                //ms1.Write(bytes, 0, bytes.Length);
+
+              
+                Console.ReadKey();
+
+
+
+
+
+
+
 
 
                 //data = new Byte[256];

@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
+using TicTacToeGame;
 
 namespace TicTacToeServer
 {
@@ -13,6 +16,9 @@ namespace TicTacToeServer
         public static void Main()
         {
             TcpListener server = null;
+
+            var players = new List<Player>();
+
             try
             {
 
@@ -22,45 +28,60 @@ namespace TicTacToeServer
                 server = new TcpListener(localAddr, port);
                 server.Start();
 
-                Byte[] bytes = new Byte[256];
-                String data = null;
+                TcpClient client = server.AcceptTcpClient();
 
-                while (true)
+                while (client.Connected)
                 {
-                    Console.Write("Czekanie na połączenie... ");
+                    Console.Write("Czekanie na gracza... ");
 
-                    TcpClient client = server.AcceptTcpClient();
+                   
+                    
                     Console.WriteLine("Połącznie");
 
-                    data = null;
-
-
                     NetworkStream stream = client.GetStream();
+                                        
+                    BinaryFormatter b = new BinaryFormatter();
 
-                    int i;
+                    var player = (Player)b.Deserialize(stream);
+
+                    players.Add(player);
+
+                    Console.WriteLine($"Dodanie gracza {player.Name}");
+
+                    var game = new Game(players[0], new Player { Name = "Magda" });
+
+                    game.MarkSpace(Mark.O, 2);
+                    Console.WriteLine("Gramy");
+
+                    var ms = new MemoryStream();
+
+                    Console.WriteLine("Wysyłanie planszy");
+
+                    b.Serialize(ms, game.Board.Grid);
+
+                    stream.Write(ms.GetBuffer(),0,(int)ms.Length);
+
+                    Console.WriteLine("Ruch");
+                    Console.ReadKey();
 
 
-                    while ((i = stream.Read(bytes, 0, bytes.Length)) != 0)
-                    {
+                    game.MarkSpace(Mark.X, 1);
+                    Console.WriteLine("Wysyłanie ruchu");
 
-                        data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
-                        Console.WriteLine("Odbieranie {0}", data);
+                    b.Serialize(ms, game.Board.Grid);
 
+                    stream.Write(ms.GetBuffer(), 0, (int)ms.Length);
 
-                        data = data.ToUpper();
+                    Console.ReadKey();
 
-                        byte[] msg = System.Text.Encoding.ASCII.GetBytes(data);
-
-                        
-                        
-                        // Send back a response.
-                        stream.Write(msg, 0, msg.Length);
-                        Console.WriteLine("Wysłanie {0}", data);
-                    }
-
-                    // Shutdown and end connection
                     client.Close();
                 }
+
+
+               
+
+
+               
             }
             catch (SocketException e)
             {
