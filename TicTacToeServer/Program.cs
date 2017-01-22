@@ -106,6 +106,7 @@ namespace TicTacToeServer
             while (client.Connected)
             {
                 ShowBoard(game.Board.Grid);
+
                 Console.WriteLine("Twój ruch...");
 
                 var space = int.Parse(Console.ReadLine());
@@ -126,9 +127,9 @@ namespace TicTacToeServer
                 }
 
                 var ms = new MemoryStream();
-                var bf = new BinaryFormatter();
 
-                bf.Serialize(ms, game.Board.Grid);
+
+                binaryFormatter.Serialize(ms, game.Board.Grid);
 
                 stream.Write(ms.GetBuffer(), 0, (int)ms.Length);
 
