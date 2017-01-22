@@ -30,9 +30,12 @@ namespace TicTacToeClient
                 Int32 port = 13000;
                 TcpClient client = new TcpClient("127.0.0.1", port);
 
-                
-
                 NetworkStream stream = client.GetStream();
+
+                Console.WriteLine("Podaj swoje nick i naciśnij ENTER ");
+                var nick = Console.ReadLine();
+                var nickByte = Encoding.ASCII.GetBytes(nick);
+                stream.Write(nickByte, 0, nickByte.Length);
 
                 var sendTask = new Task(() =>
                 {

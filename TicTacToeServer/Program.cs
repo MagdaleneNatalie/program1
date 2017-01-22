@@ -29,13 +29,15 @@ namespace TicTacToeServer
                 server.Start();
 
 
-                Console.WriteLine("Czekanie na połączenie...");
+                Console.WriteLine("Czekanie na gracza...");
 
                 TcpClient client = server.AcceptTcpClient();
-
-                Console.WriteLine("Połączono!");
-
                 NetworkStream stream = client.GetStream();
+
+                var bufferNick = new byte[20];
+                stream.Read(bufferNick, 0, 20);
+                var nick = Encoding.ASCII.GetString(bufferNick);
+                Console.WriteLine($"Podłączony gracz o nicku {nick}");
 
                 var sendTask = new Task(() =>
                 {
