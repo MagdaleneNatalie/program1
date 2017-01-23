@@ -1,35 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Net.Sockets;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
-using System.Threading.Tasks;
-using TicTacToeGame;
+﻿
 
 namespace TicTacToeServer
 {
+    using System;
+    using System.Net.Sockets;
+    using TicTacToeGame;
+
     class Program
     {
-        internal static BinaryFormatter binaryFormatter = new BinaryFormatter();
-
-        internal static TcpClient client { get; private set; }
-
-        internal static NetworkStream stream { get; private set; }
-
         internal static Game game { get; private set; }
+
+        internal static TcpServerCommands TcpCommand { get; set; }
 
         public static void Main()
         {
-            TcpListener server = null;
-
             try
             {
-                server = new TcpListener(IPAddress.Parse("127.0.0.1"), 13000);
-                server.Start();
-
                 Console.WriteLine("Podaj swoj nick i naciśnij ENTER ");
 
                 var serverPlayer = new Player
@@ -40,114 +26,103 @@ namespace TicTacToeServer
 
                 Console.WriteLine("Oczekiwanie na przeciwnika...");
 
-                client = server.AcceptTcpClient();
-                stream = client.GetStream();
+                TcpCommand = new TcpServerCommands();
 
                 var oponnentPlayer = GetOpponentPlayer();
 
-                Console.WriteLine($"Przeciwnik podłączony {oponnentPlayer.Name}" );
+                Console.WriteLine("Przeciwnik podłączony {0}", oponnentPlayer.Name);
 
-                SendNickToClient(serverPlayer.Name);
+                TcpCommand.SendNickToClient(serverPlayer.Name);
 
                 game = new Game(oponnentPlayer, serverPlayer);
 
-                Console.WriteLine($"Stworzenie gry {game.Id}");
                 Console.WriteLine("Rozpoczęcie gry...");
 
-                var sendTask = new Task(Game);
-
-                sendTask.Start();
-                sendTask.Wait();
+                Play();
             }
             catch (SocketException e)
             {
                 Console.WriteLine("SocketException: {0}", e);
             }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
             finally
             {
-                server.Stop();
+                TcpCommand.Server.Stop();
             }
 
             Console.ReadLine();
         }
 
-        private static void SendNickToClient(string name)
-        {
-            var nick = Encoding.ASCII.GetBytes(name);
-
-            stream.Write(nick, 0, nick.Length);
-        }
-
         private static Player GetOpponentPlayer()
         {
-            var bufferNick = new byte[20];
-
-            stream.Read(bufferNick, 0, 20);
-
             return new Player
             {
-                Name = Encoding.ASCII.GetString(bufferNick),
+                Name = TcpCommand.GetOpponentPlayer(),
                 Mark = Mark.X
             };
         }
 
-        private static void ShowBoard(int[] grid)
+        private static void Play()
         {
-            Console.Clear();
-            Console.WriteLine("-------");
-            for (int i = 0; i < grid.Length; i+=3)
+            while (TcpCommand.Client.Connected)
             {
-                Console.WriteLine($"|{grid[i]}|{grid[i+1]}|{grid[i+2]}|");
-            }
-            Console.WriteLine("-------");
-        }
-
-        private static void Game()
-        {
-            while (client.Connected)
-            {
-                ShowBoard(game.Board.Grid);
+                Helper.DrawBoard(game.Board.Grid);
 
                 Console.WriteLine("Twój ruch...");
 
-                var space = int.Parse(Console.ReadLine());
+                var move = Helper.GetMoveFromUser();
 
-                game.MarkSpace(Mark.O, space);
+                game.MarkSpace(Mark.O, move);
 
-                ShowBoard(game.Board.Grid);
+                Helper.DrawBoard(game.Board.Grid);
 
-                var winSign = game.CheckWin();
-
-                if (winSign != Mark.None)
+                if (CheckWin() != Mark.Empty)
                 {
-                    Console.WriteLine($"Wygrał {winSign}");
-                    var ms1 = new MemoryStream(64);
-                    var bf1 = new BinaryFormatter();
-
-                    bf1.Serialize(ms1, winSign);
-
-                    stream.Write(ms1.GetBuffer(), 0, 64);
+                    Console.WriteLine("Koniec gry");
+                    break;
                 }
 
-                var ms = new MemoryStream();
+                TcpCommand.SendBoardToClient(game.Board.Grid, (int)Mark.Empty);
 
+                Console.WriteLine("Czekam na ruch od: {0}", game.PlayerX.Name);
 
-                binaryFormatter.Serialize(ms, game.Board.Grid);
+                var moveFromClient = TcpCommand.GetMoveFromClient();
 
-                stream.Write(ms.GetBuffer(), 0, (int)ms.Length);
+                game.MarkSpace(Mark.X, moveFromClient);
 
-                Console.WriteLine($"Czekam na ruch od: {game.PlayerX.Name}");
-
-                var bufer = new byte[1];
-                stream.Read(bufer, 0, 1);
-
-                var space1 = Encoding.ASCII.GetString(bufer);
-
-                game.MarkSpace(Mark.X, int.Parse(space1));
-
+                if (CheckWin() != Mark.Empty)
+                {
+                    Console.WriteLine("Koniec gry");
+                    break;
+                }
             }
 
-            client.Close();
+            TcpCommand.Client.Close();
+        }
+
+
+        private static Mark CheckWin()
+        {
+            var winResult = game.CheckWin();
+
+            switch (winResult)
+            {
+                case Mark.O:
+                case Mark.X:
+                    Console.WriteLine("Wygrał {0}", winResult);
+                    TcpCommand.SendBoardToClient(game.Board.Grid, (int) winResult);
+                    return winResult;
+                case Mark.None:
+                    Console.WriteLine("Remis");
+                    TcpCommand.SendBoardToClient(game.Board.Grid, (int) winResult);
+                    return winResult;
+                default:
+                    return Mark.Empty;
+
+            }
         }
     }
 }
