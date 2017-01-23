@@ -11,13 +11,13 @@ namespace TicTacToeServer
 
     internal class TcpServerCommands
     {
-        public TcpClient Client { get; }
+        public TcpClient Client { get; private set; }
 
-        internal NetworkStream Stream { get; }
+        internal NetworkStream Stream { get; private set; }
 
-        internal BinaryFormatter BinaryFormatter { get; }
+        internal BinaryFormatter BinaryFormatter { get; private set; }
 
-        internal TcpListener Server { get;  }
+        internal TcpListener Server { get; private set; }
 
         public TcpServerCommands()
         {

@@ -15,7 +15,7 @@ namespace TicTacToeGame
 
     public class Game
     {
-        public Guid Id { get; }
+        public Guid Id { get; set; }
         public Board Board { get; set; }
 
         public Player PlayerX { get; private set; }
