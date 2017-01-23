@@ -1,22 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Sockets;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
-using System.Threading.Tasks;
-using TicTacToeGame;
-
+﻿
 namespace TicTacToeClient
 {
+    using System;
+    using System.Net.Sockets;
+    using TicTacToeGame;
+
     class Program
     {
-        internal static BinaryFormatter binaryFormatter = new BinaryFormatter();
-
         internal static TcpClientCommands TcpCommands { get; set; } 
 
-        internal static string opponentName;
+        private static string _opponentName;
 
         static void Main(string[] args)
         {
@@ -28,9 +21,9 @@ namespace TicTacToeClient
 
                 TcpCommands.SendNickToServer(Console.ReadLine());
                 
-                opponentName = TcpCommands.GetOpponentName();
+                _opponentName = TcpCommands.GetOpponentName();
 
-                Console.WriteLine("Grasz z {0}", opponentName);
+                Console.WriteLine("Grasz z {0}", _opponentName);
 
                 Play();
 
@@ -45,7 +38,6 @@ namespace TicTacToeClient
             }
 
             Console.ReadKey();
-
         }
 
         private static void Play()
@@ -76,12 +68,13 @@ namespace TicTacToeClient
 
                 Helper.DrawBoard(board);
 
-                Console.WriteLine("Czekam na ruch od: {0}", opponentName);
+                Console.WriteLine("Czekam na ruch od: {0}", _opponentName);
 
                 TcpCommands.SendMoveToServer(move);
             }
 
             Console.WriteLine("Koniec gry");
+
             Console.ReadKey();
         }
     }

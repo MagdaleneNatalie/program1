@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace TicTacToeGame
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
     public enum Mark
     {
         Empty = 0,
