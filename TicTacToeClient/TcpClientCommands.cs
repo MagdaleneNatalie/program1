@@ -10,11 +10,11 @@ namespace TicTacToeClient
 
     internal class TcpClientCommands
     {
-        public TcpClient Client { get; }
+        public TcpClient Client { get; private set; }
 
-        internal NetworkStream Stream { get; }
+        internal NetworkStream Stream { get; private set; }
 
-        internal BinaryFormatter BinaryFormatter { get; }
+        internal BinaryFormatter BinaryFormatter { get; private set; }
 
         public TcpClientCommands(string ip, int port)
         {
