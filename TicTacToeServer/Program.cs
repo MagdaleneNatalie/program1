@@ -72,44 +72,19 @@ namespace TicTacToeServer
             };
         }
 
-        private static void ShowBoard(int[] grid)
-        {
-            Console.Clear();
-          
-            for (int i = 0; i < grid.Length-1; i+=3)
-            {
-                Console.WriteLine(" -----------");
-                Console.WriteLine("| {0} | {1} | {2} |",DrawSign(grid[i]), DrawSign(grid[i+1]), DrawSign(grid[i+2]));
-            }
-
-            Console.WriteLine(" -----------");
-
-        }
-
-        private static string DrawSign(int i)
-        {
-            switch (i)
-            {
-                case 1:
-                    return "X";
-                case 2:
-                    return "O";
-                default:
-                    return " ";
-            }
-        }
-
         private static void Play()
         {
             while (TcpCommand.Client.Connected)
             {
-                ShowBoard(game.Board.Grid);
+                Helper.DrawBoard(game.Board.Grid);
 
                 Console.WriteLine("Twój ruch...");
 
-                game.MarkSpace(Mark.O, int.Parse(Console.ReadLine()));
+                var move = Helper.GetMoveFromUser();
 
-                ShowBoard(game.Board.Grid);
+                game.MarkSpace(Mark.O, move);
+
+                Helper.DrawBoard(game.Board.Grid);
 
                 CheckWin(); 
 
@@ -117,15 +92,17 @@ namespace TicTacToeServer
 
                 Console.WriteLine("Czekam na ruch od: {0}", game.PlayerX.Name);
 
-                var move = TcpCommand.GetMoveFromClient();
+                var moveFromClient = TcpCommand.GetMoveFromClient();
 
-                game.MarkSpace(Mark.X, move);
+                game.MarkSpace(Mark.X, moveFromClient);
 
                 CheckWin();
             }
 
             TcpCommand.Client.Close();
         }
+
+        
 
         private static void CheckWin()
         {

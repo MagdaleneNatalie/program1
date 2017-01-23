@@ -14,30 +14,25 @@ namespace TicTacToeClient
     {
         internal static BinaryFormatter binaryFormatter = new BinaryFormatter();
 
-        internal static TcpClient client = new TcpClient("127.0.0.1", 13000);
-
-        internal static NetworkStream stream = client.GetStream();
+        internal static TcpCommands TcpCommands { get; set; } 
 
         internal static string opponentName;
 
         static void Main(string[] args)
         {
+            TcpCommands = new TcpCommands();
+
             try
             {
                 Console.WriteLine("Podaj swoje nick i naciśnij ENTER ");
 
-                var nickByte = Encoding.ASCII.GetBytes(Console.ReadLine());
+                TcpCommands.SendNickToServer(Console.ReadLine());
+                
+                opponentName = TcpCommands.GetOpponentName();
 
-                stream.Write(nickByte, 0, nickByte.Length);
-
-                var bufer = new byte[20];
-                stream.Read(bufer, 0, 20);
-                opponentName = Encoding.ASCII.GetString(bufer);
                 Console.WriteLine("Grasz z {0}", opponentName);
 
-                var gameTask = new Task(GameTask);
-
-                gameTask.Start();
+                Play();
 
             }
             catch (SocketException e)
@@ -52,76 +47,35 @@ namespace TicTacToeClient
             Console.ReadKey();
 
         }
-        private static void ShowBoard(int[] grid)
+
+        private static void Play()
         {
-            Console.Clear();
-
-            for (int i = 0; i < grid.Length - 1; i += 3)
+            while (TcpCommands.Client.Connected)
             {
-                Console.WriteLine(" -----------");
-                Console.WriteLine("| {0} | {1} | {2} |", DrawSign(grid[i]), DrawSign(grid[i + 1]), DrawSign(grid[i + 2]));
-            }
+                var board = TcpCommands.GetBoardFormServer();
 
-            Console.WriteLine(" -----------");
+                Helper.DrawBoard(board);
 
-        }
-
-        private static string DrawSign(int i)
-        {
-            switch (i)
-            {
-                case 1:
-                    return "X";
-                case 2:
-                    return "O";
-                default:
-                    return " ";
-            }
-        }
-
-        private static void GameTask()
-        {
-            while (client.Connected)
-            {
-                var boardGridByteArray = new byte[68];
-
-                stream.Read(boardGridByteArray, 0, boardGridByteArray.Length);
-
-                var ms = new MemoryStream(boardGridByteArray);
-
-                var obj = (int[])binaryFormatter.Deserialize(ms);
-
-                ShowBoard(obj);
-
-                if (obj[9] != 0)
+                if (board[9] != 0)
                 {
-                    Console.WriteLine("Wygrał {0}", Enum.GetName(typeof(Mark), obj[9]));
+                    Console.WriteLine("Wygrał {0}", Enum.GetName(typeof(Mark), board[9]));
                     break;
                 }
 
                 Console.WriteLine("Twój ruch...");
 
-                var space = Console.ReadLine();
+                var move = Helper.GetMoveFromUser();
 
-                var spaceByte = Encoding.ASCII.GetBytes(space);
+                board[move] = (int)Mark.X;
 
-                var board = obj;
-
-                board[int.Parse(space)] = (int)Mark.X;
-
-                ShowBoard(board);
+                Helper.DrawBoard(board);
 
                 Console.WriteLine("Czekam na ruch od: {0}", opponentName);
 
-                stream.Write(spaceByte, 0, spaceByte.Length);
-
+                TcpCommands.SendMoveToServer(move);
             }
 
             Console.ReadKey();
-            stream.Close();
-            client.Close();
-
         }
-    
     }
 }
