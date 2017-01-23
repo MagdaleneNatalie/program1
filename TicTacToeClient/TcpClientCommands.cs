@@ -10,6 +10,7 @@ namespace TicTacToeClient
     using System.Net;
     using System.Net.Sockets;
     using System.Runtime.Serialization.Formatters.Binary;
+    using System.Threading;
 
     internal class TcpClientCommands
     {
@@ -23,9 +24,24 @@ namespace TicTacToeClient
         {
             this.BinaryFormatter =  new BinaryFormatter();
 
-            this.Client = new TcpClient(ip, port);
+            while (true)
+            {
+                try
+                {
+                    this.Client = new TcpClient(ip, port);
 
-            this.Stream = Client.GetStream();
+                    this.Stream = Client.GetStream();
+
+                    break;
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine("Brak serwera gry. Następna próba za 2s");
+                    Thread.Sleep(2000);
+                }
+            }
+
+           
         }
 
         public void SendNickToServer(string name)

@@ -86,7 +86,11 @@ namespace TicTacToeServer
 
                 Helper.DrawBoard(game.Board.Grid);
 
-                CheckWin(); 
+                if (CheckWin() != Mark.Empty)
+                {
+                    Console.WriteLine("Koniec gry");
+                    break;
+                }
 
                 TcpCommand.SendBoardToClient(game.Board.Grid, (int)Mark.Empty);
 
@@ -96,29 +100,35 @@ namespace TicTacToeServer
 
                 game.MarkSpace(Mark.X, moveFromClient);
 
-                CheckWin();
+                if (CheckWin() != Mark.Empty)
+                {
+                    Console.WriteLine("Koniec gry");
+                    break;
+                }
             }
 
             TcpCommand.Client.Close();
         }
 
 
-        private static void CheckWin()
+        private static Mark CheckWin()
         {
-            Mark winSign = game.CheckWin();
+            var winResult = game.CheckWin();
 
-            if (game.Board.Grid.All(m=>m != (int)Mark.Empty))
+            switch (winResult)
             {
-                Console.WriteLine("Remis");
+                case Mark.O:
+                case Mark.X:
+                    Console.WriteLine("Wygrał {0}", winResult);
+                    TcpCommand.SendBoardToClient(game.Board.Grid, (int) winResult);
+                    return winResult;
+                case Mark.None:
+                    Console.WriteLine("Remis");
+                    TcpCommand.SendBoardToClient(game.Board.Grid, (int) winResult);
+                    return winResult;
+                default:
+                    return Mark.Empty;
 
-                TcpCommand.SendBoardToClient(game.Board.Grid, (int)Mark.None);
-            }
-
-            if (winSign != Mark.None)
-            {
-                Console.WriteLine("Wygrał {0}", winSign);
-
-                TcpCommand.SendBoardToClient(game.Board.Grid, (int)winSign);
             }
         }
     }

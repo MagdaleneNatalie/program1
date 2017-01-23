@@ -27,7 +27,7 @@ namespace TicTacToeGame
                 }
                 else
                 {
-                    Console.WriteLine("Błądna wartość. Poprawne wartości to: {0} ", string.Join(",", correctValues));
+                    Console.WriteLine(" -- Błędna wartość. Poprawne wartości to: {0} ", string.Join(",", correctValues));
                 }
             }
 

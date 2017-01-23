@@ -8,10 +8,10 @@ namespace TicTacToeGame
 {
     public enum Mark
     {
-        None = 0,
+        Empty = 0,
         X = 1,
         O = 2,
-        Empty = 3
+        None = 3
     }
 
     public class Game
@@ -51,27 +51,46 @@ namespace TicTacToeGame
         {
             var result = new List<Mark>();
 
-            result.Add(this.CheckGrid(0, 1, 2));
-            result.Add(this.CheckGrid(3, 4, 5));
-            result.Add(this.CheckGrid(6, 7, 8));
-            result.Add(this.CheckGrid(0, 3, 6));
-            result.Add(this.CheckGrid(1, 4, 7));
-            result.Add(this.CheckGrid(2, 5, 8));
-            result.Add(this.CheckGrid(0, 4, 8));
-            result.Add(this.CheckGrid(6, 4, 2));
+            result.Add(this.CheckXoWinResult(0, 1, 2));
+            result.Add(this.CheckXoWinResult(3, 4, 5));
+            result.Add(this.CheckXoWinResult(6, 7, 8));
+            result.Add(this.CheckXoWinResult(0, 3, 6));
+            result.Add(this.CheckXoWinResult(1, 4, 7));
+            result.Add(this.CheckXoWinResult(2, 5, 8));
+            result.Add(this.CheckXoWinResult(0, 4, 8));
+            result.Add(this.CheckXoWinResult(6, 4, 2));
+            result.Add(this.CheckDraftResult());
 
-            Mark? r = result.FirstOrDefault(m => m != Mark.Empty);
-
-            return r == null ? Mark.None : (Mark)r;
+            return result.FirstOrDefault(m => m != Mark.Empty);
         }
 
-        private Mark CheckGrid(int place1, int place2, int place3)
+        private Mark CheckDraftResult()
         {
-            if ((this.Board.Grid[place1] == this.Board.Grid[place2]) && (this.Board.Grid[place2] == this.Board.Grid[place3]))
+            if (this.Board.Grid.All(m => m != (int)Mark.Empty))
             {
-                return (Mark)this.Board.Grid[place1];
+                return Mark.None;
             }
-            return Mark.None;
+
+            return Mark.Empty;
+        }
+
+        private Mark CheckXoWinResult(int place1, int place2, int place3)
+        {
+            if ((this.Board.Grid[place1] == (int)Mark.O) && 
+                (this.Board.Grid[place2] == (int)Mark.O) && 
+                (this.Board.Grid[place3] == (int)Mark.O))
+            {
+                return Mark.O;
+            }
+
+            if ((this.Board.Grid[place1] == (int)Mark.X) && 
+                (this.Board.Grid[place2] == (int)Mark.X) && 
+                (this.Board.Grid[place3] == (int)Mark.X))
+            {
+                return Mark.X;
+            }
+
+            return Mark.Empty;
         }
     }
 }
