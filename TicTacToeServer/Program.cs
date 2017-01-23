@@ -11,6 +11,8 @@ using TicTacToeGame;
 
 namespace TicTacToeServer
 {
+    using System.ComponentModel;
+
     class Program
     {
         internal static Game game { get; private set; }
@@ -45,8 +47,6 @@ namespace TicTacToeServer
                 Console.WriteLine("Rozpoczęcie gry...");
 
                 Play();
-
-
             }
             catch (SocketException e)
             {
@@ -76,12 +76,28 @@ namespace TicTacToeServer
         private static void ShowBoard(int[] grid)
         {
             Console.Clear();
-            Console.WriteLine("-------");
+          
             for (int i = 0; i < grid.Length-1; i+=3)
             {
-                Console.WriteLine($"|{grid[i]}|{grid[i+1]}|{grid[i+2]}|");
+                Console.WriteLine(" -----------");
+                Console.WriteLine("| {0} | {1} | {2} |",DrawSign(grid[i]), DrawSign(grid[i+1]), DrawSign(grid[i+2]));
             }
-            Console.WriteLine("-------");
+
+            Console.WriteLine(" -----------");
+
+        }
+
+        private static string DrawSign(int i)
+        {
+            switch (i)
+            {
+                case 1:
+                    return "X";
+                case 2:
+                    return "O";
+                default:
+                    return " ";
+            }
         }
 
         private static void Play()
