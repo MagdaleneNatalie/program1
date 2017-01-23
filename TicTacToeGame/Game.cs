@@ -11,6 +11,7 @@ namespace TicTacToeGame
         None = 0,
         X = 1,
         O = 2,
+        Empty = 3
     }
 
     public class Game
@@ -59,7 +60,7 @@ namespace TicTacToeGame
             result.Add(this.CheckGrid(0, 4, 8));
             result.Add(this.CheckGrid(6, 4, 2));
 
-            Mark? r = result.FirstOrDefault(m => m != Mark.None);
+            Mark? r = result.FirstOrDefault(m => m != Mark.Empty);
 
             return r == null ? Mark.None : (Mark)r;
         }

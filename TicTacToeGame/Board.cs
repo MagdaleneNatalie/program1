@@ -12,7 +12,7 @@ namespace TicTacToeGame
 
         public Board()
         {
-            this.Grid = new int[9] { (int)Mark.None, (int)Mark.None, (int)Mark.None, (int)Mark.None, (int)Mark.None, (int)Mark.None, (int)Mark.None, (int)Mark.None, (int)Mark.None };
+            this.Grid = new int[9] { (int)Mark.Empty, (int)Mark.Empty, (int)Mark.Empty, (int)Mark.Empty, (int)Mark.Empty, (int)Mark.Empty, (int)Mark.Empty, (int)Mark.Empty, (int)Mark.Empty };
         }
     }
 }

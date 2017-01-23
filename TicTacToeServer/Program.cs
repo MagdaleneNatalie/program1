@@ -17,7 +17,7 @@ namespace TicTacToeServer
     {
         internal static Game game { get; private set; }
 
-        internal static TcpCommands TcpCommand { get; set; }
+        internal static TcpServerCommands TcpCommand { get; set; }
 
         public static void Main()
         {
@@ -33,7 +33,7 @@ namespace TicTacToeServer
 
                 Console.WriteLine("Oczekiwanie na przeciwnika...");
 
-                TcpCommand = new TcpCommands();
+                TcpCommand = new TcpServerCommands();
 
                 var oponnentPlayer = GetOpponentPlayer();
 
@@ -88,7 +88,7 @@ namespace TicTacToeServer
 
                 CheckWin(); 
 
-                TcpCommand.SendBoardToClient(game.Board.Grid, 0);
+                TcpCommand.SendBoardToClient(game.Board.Grid, (int)Mark.Empty);
 
                 Console.WriteLine("Czekam na ruch od: {0}", game.PlayerX.Name);
 
@@ -102,16 +102,22 @@ namespace TicTacToeServer
             TcpCommand.Client.Close();
         }
 
-        
 
         private static void CheckWin()
         {
-            var winSign = game.CheckWin();
+            Mark winSign = game.CheckWin();
+
+            if (game.Board.Grid.All(m=>m != (int)Mark.Empty))
+            {
+                Console.WriteLine("Remis");
+
+                TcpCommand.SendBoardToClient(game.Board.Grid, (int)Mark.None);
+            }
 
             if (winSign != Mark.None)
             {
                 Console.WriteLine("Wygrał {0}", winSign);
-                
+
                 TcpCommand.SendBoardToClient(game.Board.Grid, (int)winSign);
             }
         }

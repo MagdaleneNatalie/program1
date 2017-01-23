@@ -11,7 +11,7 @@ namespace TicTacToeClient
     using System.Net.Sockets;
     using System.Runtime.Serialization.Formatters.Binary;
 
-    internal class TcpCommands
+    internal class TcpClientCommands
     {
         public TcpClient Client { get; }
 
@@ -19,13 +19,13 @@ namespace TicTacToeClient
 
         internal BinaryFormatter BinaryFormatter { get; }
 
-        public TcpCommands()
+        public TcpClientCommands(string ip, int port)
         {
             this.BinaryFormatter =  new BinaryFormatter();
 
-            Client = new TcpClient("127.0.0.1", 13000);
+            this.Client = new TcpClient(ip, port);
 
-            Stream = Client.GetStream();
+            this.Stream = Client.GetStream();
         }
 
         public void SendNickToServer(string name)

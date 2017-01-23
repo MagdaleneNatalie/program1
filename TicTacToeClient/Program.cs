@@ -14,13 +14,13 @@ namespace TicTacToeClient
     {
         internal static BinaryFormatter binaryFormatter = new BinaryFormatter();
 
-        internal static TcpCommands TcpCommands { get; set; } 
+        internal static TcpClientCommands TcpCommands { get; set; } 
 
         internal static string opponentName;
 
         static void Main(string[] args)
         {
-            TcpCommands = new TcpCommands();
+            TcpCommands = new TcpClientCommands("127.0.0.1", 13000);
 
             try
             {
@@ -56,7 +56,13 @@ namespace TicTacToeClient
 
                 Helper.DrawBoard(board);
 
-                if (board[9] != 0)
+                if (board[9] == (int)Mark.None)
+                {
+                    Console.WriteLine("Remis");
+                    break;
+                }
+
+                if (board[9] == (int)Mark.X || board[9] == (int)Mark.O)
                 {
                     Console.WriteLine("Wygrał {0}", Enum.GetName(typeof(Mark), board[9]));
                     break;
@@ -75,6 +81,7 @@ namespace TicTacToeClient
                 TcpCommands.SendMoveToServer(move);
             }
 
+            Console.WriteLine("Koniec gry");
             Console.ReadKey();
         }
     }

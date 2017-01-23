@@ -11,7 +11,7 @@ namespace TicTacToeServer
     using System.Net.Sockets;
     using System.Runtime.Serialization.Formatters.Binary;
 
-    internal class TcpCommands
+    internal class TcpServerCommands
     {
         public TcpClient Client { get; }
 
@@ -21,7 +21,7 @@ namespace TicTacToeServer
 
         internal TcpListener Server { get;  }
 
-        public TcpCommands()
+        public TcpServerCommands()
         {
             this.BinaryFormatter =  new BinaryFormatter();
 
