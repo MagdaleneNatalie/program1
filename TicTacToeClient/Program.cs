@@ -38,15 +38,15 @@ namespace TicTacToeClient
                 var gameTask = new Task(GameTask);
 
                 gameTask.Start();
-             
-            }
-            catch (ArgumentNullException e)
-            {
-                Console.WriteLine("ArgumentNullException: {0}", e);
+
             }
             catch (SocketException e)
             {
                 Console.WriteLine("SocketException: {0}", e);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
             }
 
             Console.ReadKey();
@@ -80,7 +80,6 @@ namespace TicTacToeClient
                 if (obj[9] != 0)
                 {
                     Console.WriteLine($"Wygrał {Enum.GetName(typeof(Mark), obj[9])}");
-                    Console.ReadKey();
                     break;
                 }
 
@@ -102,6 +101,7 @@ namespace TicTacToeClient
 
             }
 
+            Console.ReadKey();
             stream.Close();
             client.Close();
 

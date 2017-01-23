@@ -13,23 +13,14 @@ namespace TicTacToeServer
 {
     class Program
     {
-        internal static BinaryFormatter binaryFormatter = new BinaryFormatter();
-
-        internal static TcpClient client { get; private set; }
-
-        internal static NetworkStream stream { get; private set; }
-
         internal static Game game { get; private set; }
+
+        internal static TcpCommands TcpCommand { get; set; }
 
         public static void Main()
         {
-            TcpListener server = null;
-
             try
             {
-                server = new TcpListener(IPAddress.Parse("127.0.0.1"), 13000);
-                server.Start();
-
                 Console.WriteLine("Podaj swoj nick i naciśnij ENTER ");
 
                 var serverPlayer = new Player
@@ -40,53 +31,44 @@ namespace TicTacToeServer
 
                 Console.WriteLine("Oczekiwanie na przeciwnika...");
 
-                client = server.AcceptTcpClient();
-                stream = client.GetStream();
+                TcpCommand = new TcpCommands();
 
                 var oponnentPlayer = GetOpponentPlayer();
 
                 Console.WriteLine($"Przeciwnik podłączony {oponnentPlayer.Name}" );
 
-                SendNickToClient(serverPlayer.Name);
+                TcpCommand.SendNickToClient(serverPlayer.Name);
 
                 game = new Game(oponnentPlayer, serverPlayer);
 
                 Console.WriteLine($"Stworzenie gry {game.Id}");
                 Console.WriteLine("Rozpoczęcie gry...");
 
-                var sendTask = new Task(Game);
+                Play();
 
-                sendTask.Start();
-                sendTask.Wait();
+
             }
             catch (SocketException e)
             {
                 Console.WriteLine("SocketException: {0}", e);
             }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
             finally
             {
-                server.Stop();
+                TcpCommand.Server.Stop();
             }
 
             Console.ReadLine();
         }
 
-        private static void SendNickToClient(string name)
-        {
-            var nick = Encoding.ASCII.GetBytes(name);
-
-            stream.Write(nick, 0, nick.Length);
-        }
-
         private static Player GetOpponentPlayer()
         {
-            var bufferNick = new byte[20];
-
-            stream.Read(bufferNick, 0, 20);
-
             return new Player
             {
-                Name = Encoding.ASCII.GetString(bufferNick),
+                Name = TcpCommand.GetOpponentPlayer(),
                 Mark = Mark.X
             };
         }
@@ -102,46 +84,32 @@ namespace TicTacToeServer
             Console.WriteLine("-------");
         }
 
-        private static void Game()
+        private static void Play()
         {
-            while (client.Connected)
+            while (TcpCommand.Client.Connected)
             {
                 ShowBoard(game.Board.Grid);
 
                 Console.WriteLine("Twój ruch...");
 
-                var space = int.Parse(Console.ReadLine());
-
-                game.MarkSpace(Mark.O, space);
+                game.MarkSpace(Mark.O, int.Parse(Console.ReadLine()));
 
                 ShowBoard(game.Board.Grid);
 
-                CheckWin();
+                CheckWin(); 
 
-                var ms = new MemoryStream();
-
-                var msg = new int[10];
-
-                game.Board.Grid.CopyTo(msg,0);
-
-                binaryFormatter.Serialize(ms, msg);
-
-                stream.Write(ms.GetBuffer(), 0, (int)ms.Length);
+                TcpCommand.SendBoardToClient(game.Board.Grid, 0);
 
                 Console.WriteLine($"Czekam na ruch od: {game.PlayerX.Name}");
 
-                var bufer = new byte[1];
-                stream.Read(bufer, 0, 1);
+                var move = TcpCommand.GetMoveFromClient();
 
-                var space1 = Encoding.ASCII.GetString(bufer);
-
-                game.MarkSpace(Mark.X, int.Parse(space1));
+                game.MarkSpace(Mark.X, move);
 
                 CheckWin();
-
             }
 
-            client.Close();
+            TcpCommand.Client.Close();
         }
 
         private static void CheckWin()
@@ -151,18 +119,8 @@ namespace TicTacToeServer
             if (winSign != Mark.None)
             {
                 Console.WriteLine($"Wygrał {winSign}");
-
-                var ms1 = new MemoryStream();
-                var bf1 = new BinaryFormatter();
-
-                var msg = new int[10];
-                game.Board.Grid.CopyTo(msg, 0);
-
-                msg[9] = (int) winSign;
-
-                bf1.Serialize(ms1, msg);
-
-                stream.Write(ms1.GetBuffer(), 0, (int)ms1.Length);
+                
+                TcpCommand.SendBoardToClient(game.Board.Grid, (int)winSign);
             }
         }
     }
