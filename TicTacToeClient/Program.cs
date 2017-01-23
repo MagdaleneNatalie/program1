@@ -12,45 +12,33 @@ namespace TicTacToeClient
 {
     class Program
     {
+        internal static BinaryFormatter binaryFormatter = new BinaryFormatter();
+
+        internal static TcpClient client = new TcpClient("127.0.0.1", 13000);
+
+        internal static NetworkStream stream = client.GetStream();
+
+        internal static string opponentName;
+
         static void Main(string[] args)
         {
-            var player = new Player
-            {
-                Name = "Przemek"
-            };
-
-            BinaryFormatter formatter = new BinaryFormatter();
-
-            var ms = new MemoryStream();
-
-            formatter.Serialize(ms, player);
-
-            
-
-
             try
             {
-                Int32 port = 13000;
-                TcpClient client = new TcpClient("127.0.0.1", port);
+                Console.WriteLine("Podaj swoje nick i naciśnij ENTER ");
 
+                var nickByte = Encoding.ASCII.GetBytes(Console.ReadLine());
+
+                stream.Write(nickByte, 0, nickByte.Length);
+
+                var bufer = new byte[20];
+                stream.Read(bufer, 0, 20);
+                opponentName = Encoding.ASCII.GetString(bufer);
+                Console.WriteLine($"Grasz z {opponentName}");
+
+                var gameTask = new Task(GameTask);
+
+                gameTask.Start();
              
-                NetworkStream stream = client.GetStream();
-
-                stream.Write(ms.GetBuffer(), 0, (int)ms.Length);
-
-                Console.WriteLine("Sent:");
-
-
-                //data = new Byte[256];
-
-                //String responseData = String.Empty;
-
-                //Int32 bytes = stream.Read(data, 0, data.Length);
-                //responseData = System.Text.Encoding.ASCII.GetString(data, 0, bytes);
-                //Console.WriteLine("Received: {0}", responseData);
-
-                stream.Close();
-                client.Close();
             }
             catch (ArgumentNullException e)
             {
@@ -61,6 +49,66 @@ namespace TicTacToeClient
                 Console.WriteLine("SocketException: {0}", e);
             }
 
+            Console.ReadKey();
+
         }
+        private static void ShowBoard(int[] grid)
+        {
+            Console.Clear();
+            Console.WriteLine("-------");
+            for (int i = 0; i < grid.Length; i += 3)
+            {
+                Console.WriteLine($"|{grid[i]}|{grid[i + 1]}|{grid[i + 2]}|");
+            }
+            Console.WriteLine("-------");
+        }
+
+        private static void GameTask()
+        {
+            while (client.Connected)
+            {
+                var boardGridByteArray = new byte[64];
+
+                stream.Read(boardGridByteArray, 0, boardGridByteArray.Length);
+
+                var ms = new MemoryStream(boardGridByteArray);
+
+                var obj = binaryFormatter.Deserialize(ms);
+
+                if (obj is int[])
+                {
+                    ShowBoard((int[])obj);
+                }
+
+                if (obj is Mark)
+                {
+                    Console.WriteLine($"Wygrał {(Mark)obj}");
+                    Console.ReadKey();
+                    break;
+                }
+
+                Console.WriteLine("Twój ruch...");
+
+                var space = Console.ReadLine();
+
+                var spaceByte = Encoding.ASCII.GetBytes(space);
+
+                var board = (int[])obj;
+
+                board[int.Parse(space)] = (int)Mark.X;
+
+                ShowBoard(board);
+
+                Console.WriteLine($"Czekam na ruch od: {opponentName}");
+
+                stream.Write(spaceByte, 0, spaceByte.Length);
+
+            }
+
+            stream.Close();
+            client.Close();
+
+        }
+    
     }
 }
