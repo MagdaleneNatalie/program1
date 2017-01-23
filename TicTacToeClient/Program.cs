@@ -56,7 +56,7 @@ namespace TicTacToeClient
         {
             Console.Clear();
             Console.WriteLine("-------");
-            for (int i = 0; i < grid.Length; i += 3)
+            for (int i = 0; i < grid.Length-1; i += 3)
             {
                 Console.WriteLine($"|{grid[i]}|{grid[i + 1]}|{grid[i + 2]}|");
             }
@@ -67,22 +67,19 @@ namespace TicTacToeClient
         {
             while (client.Connected)
             {
-                var boardGridByteArray = new byte[64];
+                var boardGridByteArray = new byte[68];
 
                 stream.Read(boardGridByteArray, 0, boardGridByteArray.Length);
 
                 var ms = new MemoryStream(boardGridByteArray);
 
-                var obj = binaryFormatter.Deserialize(ms);
+                var obj = (int[])binaryFormatter.Deserialize(ms);
 
-                if (obj is int[])
-                {
-                    ShowBoard((int[])obj);
-                }
+                ShowBoard(obj);
 
-                if (obj is Mark)
+                if (obj[9] != 0)
                 {
-                    Console.WriteLine($"Wygrał {(Mark)obj}");
+                    Console.WriteLine($"Wygrał {Enum.GetName(typeof(Mark), obj[9])}");
                     Console.ReadKey();
                     break;
                 }
@@ -93,7 +90,7 @@ namespace TicTacToeClient
 
                 var spaceByte = Encoding.ASCII.GetBytes(space);
 
-                var board = (int[])obj;
+                var board = obj;
 
                 board[int.Parse(space)] = (int)Mark.X;
 

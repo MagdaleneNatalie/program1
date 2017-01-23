@@ -95,7 +95,7 @@ namespace TicTacToeServer
         {
             Console.Clear();
             Console.WriteLine("-------");
-            for (int i = 0; i < grid.Length; i+=3)
+            for (int i = 0; i < grid.Length-1; i+=3)
             {
                 Console.WriteLine($"|{grid[i]}|{grid[i+1]}|{grid[i+2]}|");
             }
@@ -116,23 +116,15 @@ namespace TicTacToeServer
 
                 ShowBoard(game.Board.Grid);
 
-                var winSign = game.CheckWin();
-
-                if (winSign != Mark.None)
-                {
-                    Console.WriteLine($"Wygrał {winSign}");
-                    var ms1 = new MemoryStream(64);
-                    var bf1 = new BinaryFormatter();
-
-                    bf1.Serialize(ms1, winSign);
-
-                    stream.Write(ms1.GetBuffer(), 0, 64);
-                }
+                CheckWin();
 
                 var ms = new MemoryStream();
 
+                var msg = new int[10];
 
-                binaryFormatter.Serialize(ms, game.Board.Grid);
+                game.Board.Grid.CopyTo(msg,0);
+
+                binaryFormatter.Serialize(ms, msg);
 
                 stream.Write(ms.GetBuffer(), 0, (int)ms.Length);
 
@@ -145,9 +137,33 @@ namespace TicTacToeServer
 
                 game.MarkSpace(Mark.X, int.Parse(space1));
 
+                CheckWin();
+
             }
 
             client.Close();
+        }
+
+        private static void CheckWin()
+        {
+            var winSign = game.CheckWin();
+
+            if (winSign != Mark.None)
+            {
+                Console.WriteLine($"Wygrał {winSign}");
+
+                var ms1 = new MemoryStream();
+                var bf1 = new BinaryFormatter();
+
+                var msg = new int[10];
+                game.Board.Grid.CopyTo(msg, 0);
+
+                msg[9] = (int) winSign;
+
+                bf1.Serialize(ms1, msg);
+
+                stream.Write(ms1.GetBuffer(), 0, (int)ms1.Length);
+            }
         }
     }
 }
