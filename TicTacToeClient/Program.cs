@@ -33,7 +33,7 @@ namespace TicTacToeClient
                 var bufer = new byte[20];
                 stream.Read(bufer, 0, 20);
                 opponentName = Encoding.ASCII.GetString(bufer);
-                Console.WriteLine($"Grasz z {opponentName}");
+                Console.WriteLine("Grasz z {0}", opponentName);
 
                 var gameTask = new Task(GameTask);
 
@@ -95,7 +95,7 @@ namespace TicTacToeClient
 
                 if (obj[9] != 0)
                 {
-                    Console.WriteLine($"Wygrał {Enum.GetName(typeof(Mark), obj[9])}");
+                    Console.WriteLine("Wygrał {0}", Enum.GetName(typeof(Mark), obj[9]));
                     break;
                 }
 
@@ -111,7 +111,7 @@ namespace TicTacToeClient
 
                 ShowBoard(board);
 
-                Console.WriteLine($"Czekam na ruch od: {opponentName}");
+                Console.WriteLine("Czekam na ruch od: {0}", opponentName);
 
                 stream.Write(spaceByte, 0, spaceByte.Length);
 

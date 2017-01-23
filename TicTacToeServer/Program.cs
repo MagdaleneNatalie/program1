@@ -37,13 +37,12 @@ namespace TicTacToeServer
 
                 var oponnentPlayer = GetOpponentPlayer();
 
-                Console.WriteLine($"Przeciwnik podłączony {oponnentPlayer.Name}" );
+                Console.WriteLine("Przeciwnik podłączony {0}", oponnentPlayer.Name);
 
                 TcpCommand.SendNickToClient(serverPlayer.Name);
 
                 game = new Game(oponnentPlayer, serverPlayer);
 
-                Console.WriteLine($"Stworzenie gry {game.Id}");
                 Console.WriteLine("Rozpoczęcie gry...");
 
                 Play();
@@ -116,7 +115,7 @@ namespace TicTacToeServer
 
                 TcpCommand.SendBoardToClient(game.Board.Grid, 0);
 
-                Console.WriteLine($"Czekam na ruch od: {game.PlayerX.Name}");
+                Console.WriteLine("Czekam na ruch od: {0}", game.PlayerX.Name);
 
                 var move = TcpCommand.GetMoveFromClient();
 
@@ -134,7 +133,7 @@ namespace TicTacToeServer
 
             if (winSign != Mark.None)
             {
-                Console.WriteLine($"Wygrał {winSign}");
+                Console.WriteLine("Wygrał {0}", winSign);
                 
                 TcpCommand.SendBoardToClient(game.Board.Grid, (int)winSign);
             }
